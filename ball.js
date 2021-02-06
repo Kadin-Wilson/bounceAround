@@ -1,14 +1,14 @@
 import {Vector} from './vector.js';
 
 export class Ball {
-    constructor(x, y, radius, growRate) {
+    constructor(x, y, radius, vx = 0, vy = 0) {
         this.position = new Vector(x, y);
-        this.velocity = new Vector(0, 0);
+        this.velocity = new Vector(vx, vy);
         this.radius = radius;
     }
 
-    move() {
-        this.position = this.position.add(this.velocity);
+    move(dt) {
+        this.position = this.position.add(this.velocity.mult(dt));
     }
 
     impulse(x, y, intensity, decay) {
