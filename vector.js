@@ -13,7 +13,7 @@ export class Vector {
     }
 
     minus(v) {
-        return new Vector(v.x - this.x, v.y - this.y);
+        return new Vector(this.x - v.x, this.y - v.y);
     }
 
     mult(s) {

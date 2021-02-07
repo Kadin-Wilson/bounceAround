@@ -1,32 +1,28 @@
 import {Vector} from './vector.js';
 
 export class Ball {
-    constructor(x, y, radius, vx = 0, vy = 0) {
+    constructor(x, y, radius) {
         this.position = new Vector(x, y);
-        this.velocity = new Vector(vx, vy);
+        this.velocity = new Vector(0, 0);
+        this.acceleration = new Vector(0, 0);
         this.radius = radius;
+        this.waypoint = new Vector(x, y);
     }
 
     move(dt) {
-        this.position = this.position.add(this.velocity.mult(dt));
+        const distance = this.waypoint.distance(this.position);
+        if (distance != 0) {
+            console.log('hit');
+            const direction = this.waypoint.minus(this.position).mult(1/distance);
+            this.acceleration = direction.mult(10);
+        }
+
+        this.velocity = this.velocity.add(this.acceleration.mult(dt));
+
+        this.position = this.position.add(this.velocity);
     }
 
-    impulse(x, y, intensity, decay) {
-        const impulse = new Vector(x, y);
-        const distance = impulse.distance(this.position);
-
-        const direction = impulse.minus(this.position).mult(1/distance);
-        let magnitude = intensity * (decay / distance);
-        magnitude = magnitude > intensity ? intensity : magnitude;
-
-        this.velocity = this.velocity.add(direction.mult(magnitude));
-    }
-
-    getPosition() {
-        return this.position;
-    }
-
-    getRadius() {
-        return this.radius;
+    setWaypoint(x, y) {
+        this.waypoint = new Vector(x, y);
     }
 }

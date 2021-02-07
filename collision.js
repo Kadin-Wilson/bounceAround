@@ -1,11 +1,14 @@
 export class World {
-    constructor(slide) {
+    constructor(slide, bounce) {
         this.slide = slide;
+        this.bounce = bounce;
     }
     
     checkCircle(position, velocity, radius) {
         let circle = {position, velocity, radius};
         if (this.checkSlide(circle))
+            return circle;
+        if (this.checkBounce(circle))
             return circle;
         return circle;
     }
@@ -31,6 +34,35 @@ export class World {
                 }
                 else if (side == 3) { // left
                     circle.velocity.x = 0;
+                    circle.position.x = box.x - circle.radius - 1;
+                }
+            }
+        }
+
+        return returnFlag;
+    }
+
+    checkBounce(circle) {
+        let returnFlag = false;
+
+        for (let box of this.bounce) {
+            let side = this.collide(circle, box);
+            if (side != -1) {
+                returnFlag = true;
+                if (side == 0) { // top
+                    circle.velocity.y = -circle.velocity.y;
+                    circle.position.y = box.y - circle.radius - 1;
+                }
+                else if (side == 1) { // right
+                    circle.velocity.x = -circle.velocity.x;
+                    circle.position.x = box.x + box.width + circle.radius + 1;
+                }
+                else if (side == 2) { // bottom
+                    circle.velocity.y = -circle.velocity.y;
+                    circle.position.y = box.y + box.height + circle.radius + 1;
+                }
+                else if (side == 3) { // left
+                    circle.velocity.x = -circle.velocity.x;
                     circle.position.x = box.x - circle.radius - 1;
                 }
             }
