@@ -12,7 +12,6 @@ export class Ball {
     move(dt) {
         const distance = this.waypoint.distance(this.position);
         if (distance != 0) {
-            console.log('hit');
             const direction = this.waypoint.minus(this.position).mult(1/distance);
             this.acceleration = direction.mult(10);
         }

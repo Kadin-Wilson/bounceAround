@@ -98,7 +98,6 @@ export class World {
         let distance = Math.hypot(distX, distY);
 
         if (distance <= circle.radius) {
-            console.log('hit', side);
             return side;
         }
         else 

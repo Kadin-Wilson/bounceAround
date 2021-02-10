@@ -20,23 +20,37 @@ const map = new TileMap(MAP_WIDTH, MAP_HEIGHT,
 const world = new World(level.slide, level.bounce);
 const ball = new Ball(100, 375, 25);
 let lastTime = 0;
+let nextFrame;
 
 // start game on atlas load
 let atlasImg = new Image();
 atlasImg.addEventListener('load', () => {
-    // add mouse listener
+    // start gameloop
+    lastTime = performance.now() * 0.001; // adjust to seconds
+    nextFrame = requestAnimationFrame(gameLoop);
+
+    // add mouse listener to set waypoints
     canvas.addEventListener('click', (e) => {
         ball.setWaypoint(e.offsetX, e.offsetY);
     });
-    // start gameloop
-    requestAnimationFrame(gameLoop);
+
+    // pause and restart on visibility changes
+    document.addEventListener('visibilitychange', (e) => {
+        if (document.hidden) {
+            cancelAnimationFrame(nextFrame);
+        }
+        else {
+            lastTime = performance.now() * 0.001; // adjust to seconds
+            requestAnimationFrame(gameLoop);
+        }
+    });
 });
 atlasImg.src = './assets/tileAtlas64.png';
 
 function gameLoop(time) {
-    const nextFrame = requestAnimationFrame(gameLoop);
+    nextFrame = requestAnimationFrame(gameLoop);
 
-    time = time * 0.001;
+    time = time * 0.001; // adjust to seconds
     const dt = time - lastTime;
     lastTime = time;
 
