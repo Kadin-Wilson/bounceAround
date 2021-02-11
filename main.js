@@ -19,6 +19,7 @@ const map = new TileMap(MAP_WIDTH, MAP_HEIGHT,
                         ATLAS_WIDTH, ATLAS_HEIGHT, TILE_SIZE, level.indexes);
 const world = new World(level.slide, level.bounce);
 const ball = new Ball(100, 375, 25);
+const bullets = [];
 let lastTime = 0;
 let nextFrame;
 
@@ -30,8 +31,17 @@ atlasImg.addEventListener('load', () => {
     nextFrame = requestAnimationFrame(gameLoop);
 
     // add mouse listener to set waypoints
-    canvas.addEventListener('click', (e) => {
-        ball.setWaypoint(e.offsetX, e.offsetY);
+    // and fire bullets
+    canvas.addEventListener('mousedown', (e) => {
+        switch(e.button) {
+            case 0: // left mouse button
+                ball.setWaypoint(e.offsetX, e.offsetY);
+                break;
+            case 2: // right mouse button
+                if (bullets.length < 5)
+                    bullets.push(ball.fireBullet(e.offsetX, e.offsetY, 10, 300));
+                break;
+        }
     });
 
     // pause and restart on visibility changes
@@ -43,6 +53,11 @@ atlasImg.addEventListener('load', () => {
             lastTime = performance.now() * 0.001; // adjust to seconds
             requestAnimationFrame(gameLoop);
         }
+    });
+
+    // prevent context menu
+    canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
     });
 });
 atlasImg.src = './assets/tileAtlas64.png';
@@ -59,13 +74,25 @@ function gameLoop(time) {
 }
 
 function update(dt) {
-    // collision detection
-    const corrected = world.checkCircle(ball.position, ball.velocity, ball.radius);
+    // ball updates
+    let corrected = world.checkCircle(ball.position, ball.velocity, ball.radius);
     ball.position = corrected.position;
     ball.velocity = corrected.velocity;
 
-    // move ball
     ball.move(dt);
+
+    // bullet updates
+    for (let i = 0; i < bullets.length; i++) {
+        corrected = world.checkCircle(bullets[i].position, 
+                                      bullets[i].velocity, 
+                                      bullets[i].radius);
+        bullets[i].position = corrected.position;
+        bullets[i].velocity = corrected.velocity;
+        
+        if (!bullets[i].move(dt))
+            bullets.splice(i, 1);
+            
+    }
 }
 
 function draw() {
@@ -81,6 +108,15 @@ function draw() {
     ctx.beginPath()
     ctx.arc(pos.x, pos.y, ball.radius/3, 0, 7);
     ctx.fill();
+
+    // bullets
+    ctx.fillStyle = 'orange';
+    for (let bullet of bullets) {
+        pos = bullet.position;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, bullet.radius, 0, 7);
+        ctx.fill();
+    }
 
     // ball
     pos = ball.position;
